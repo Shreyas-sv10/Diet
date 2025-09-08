@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Diet & Weight Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f7f0;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #4CAF50;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+    .container {
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+    .card {
+      background: white;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-bottom: 10px;
+    }
+    input, select, button, textarea {
+      margin: 5px 0;
+      padding: 8px;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    canvas {
+      width: 100%;
+      height: 300px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Diet & Weight Tracker</h1>
+  </header>
+
+  <div class="container">
+
+    <!-- Setup Goals -->
+    <div class="card">
+      <h2>Set Your Goal</h2>
+      <label>Current Weight (kg):</label>
+      <input type="number" id="currentWeight">
+
+      <label>Ideal Weight (kg):</label>
+      <input type="number" id="idealWeight">
+
+      <label>How many kg to lose per week?</label>
+      <select id="weeklyGoal">
+        <option value="0.25">0.25 kg/week</option>
+        <option value="0.5">0.5 kg/week</option>
+        <option value="1">1 kg/week</option>
+      </select>
+
+      <button onclick="setGoal()">Save Goal</button>
+      <p id="goalResult"></p>
+    </div>
+
+    <!-- Weight Tracker -->
+    <div class="card">
+      <h2>Daily Weight Tracker</h2>
+      <label>Enter Today’s Weight (kg):</label>
+      <input type="number" id="todayWeight">
+      <button onclick="addWeight()">Add</button>
+      <canvas id="weightChart"></canvas>
+    </div>
+
+    <!-- Meal Logger -->
+    <div class="card">
+      <h2>Meal Logger</h2>
+      <label>Meal Type:</label>
+      <select id="mealType">
+        <option>Breakfast</option>
+        <option>Lunch</option>
+        <option>Snacks</option>
+        <option>Dinner</option>
+      </select>
+
+      <label>Food Item:</label>
+      <input type="text" id="foodItem">
+
+      <label>Calories:</label>
+      <input type="number" id="calories">
+
+      <button onclick="addMeal()">Add Meal</button>
+
+      <h3>Today's Meals</h3>
+      <ul id="mealList"></ul>
+      <p><b>Total Calories:</b> <span id="totalCalories">0</span> kcal</p>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    let weights = [];
+    let labels = [];
+    let totalCalories = 0;
+
+    // Chart.js setup
+    const ctx = document.getElementById('weightChart');
+    const weightChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Weight (kg)',
+          data: weights,
+          borderColor: 'green',
+          fill: false
+        }]
+      }
+    });
+
+    // Add Weight
+    function addWeight() {
+      const todayWeight = document.getElementById('todayWeight').value;
+      if (todayWeight) {
+        const today = new Date().toLocaleDateString();
+        labels.push(today);
+        weights.push(todayWeight);
+        weightChart.update();
+        document.getElementById('todayWeight').value = '';
+      }
+    }
+
+    // Add Meal
+    function addMeal() {
+      const mealType = document.getElementById('mealType').value;
+      const foodItem = document.getElementById('foodItem').value;
+      const calories = parseInt(document.getElementById('calories').value);
+
+      if (foodItem && calories) {
+        const li = document.createElement('li');
+        li.textContent = `${mealType}: ${foodItem} - ${calories} kcal`;
+        document.getElementById('mealList').appendChild(li);
+
+        totalCalories += calories;
+        document.getElementById('totalCalories').textContent = totalCalories;
+
+        document.getElementById('foodItem').value = '';
+        document.getElementById('calories').value = '';
+      }
+    }
+
+    // Set Goal
+    function setGoal() {
+      const currentWeight = parseFloat(document.getElementById('currentWeight').value);
+      const idealWeight = parseFloat(document.getElementById('idealWeight').value);
+      const weeklyGoal = parseFloat(document.getElementById('weeklyGoal').value);
+
+      if (currentWeight && idealWeight) {
+        let weeks = (currentWeight - idealWeight) / weeklyGoal;
+        if (weeks < 0) weeks = 0;
+        document.getElementById('goalResult').textContent =
+          `You will reach your ideal weight in approx ${weeks.toFixed(1)} weeks.`;
+      }
+    }
+  </script>
+</body>
+  </html>
